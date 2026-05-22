@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MJSR KPI Master — Samsons Group</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --cream: #f5f3ee;
+  --cream-dark: #ede9e1;
+  --gold: #b8922e;
+  --gold-light: #d4aa55;
+  --gold-pale: #f0e4c4;
+  --dark: #1a1a18;
+  --dark-mid: #2c2c28;
+  --mid: #5a5a52;
+  --muted: #8a8a80;
+  --border: #dedad0;
+  --white: #ffffff;
+  --tier-a-bg: #fff8ee;
+  --tier-a-text: #7a4a10;
+  --tier-a-border: #e8c080;
+  --tier-b-bg: #eef5ee;
+  --tier-b-text: #2a5a2a;
+  --tier-b-border: #90c090;
+  --tier-c-bg: #f2f2f0;
+  --tier-c-text: #4a4a44;
+  --tier-c-border: #c8c8c0;
+  --dw-bg: #f5f0f8;
+  --dw-text: #5a3a7a;
+  --dw-border: #c8b0e0;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--cream);
+  color: var(--dark);
+  min-height: 100vh;
+}
+
+/* PIN SCREEN */
+#pin-screen {
+  position: fixed; inset: 0;
+  background: var(--dark);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000;
+  flex-direction: column;
+  gap: 0;
+}
+.pin-box {
+  text-align: center;
+  padding: 56px 48px;
+  border: 1px solid #3a3a34;
+  background: var(--dark-mid);
+  border-radius: 4px;
+  min-width: 320px;
+}
+.pin-logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 11px;
+  letter-spacing: 4px;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 32px;
+}
+.pin-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 28px;
+  color: var(--cream);
+  font-weight: 400;
+  margin-bottom: 6px;
+}
+.pin-sub {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 36px;
+  letter-spacing: 0.5px;
+}
+.pin-dots {
+  display: flex; gap: 14px; justify-content: center; margin-bottom: 32px;
+}
+.pin-dot {
+  width: 12px; height: 12px; border-radius: 50%;
+  border: 1px solid #4a4a42;
+  background: transparent;
+  transition: all 0.2s;
+}
+.pin-dot.filled { background: var(--gold); border-color: var(--gold); }
+.pin-pad {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+  max-width: 240px; margin: 0 auto;
+}
+.pin-key {
+  background: #232320; border: 1px solid #3a3a34;
+  color: var(--cream); font-family: 'DM Sans', sans-serif;
+  font-size: 18px; font-weight: 300;
+  padding: 16px; border-radius: 3px;
+  cursor: pointer; transition: all 0.15s; user-select: none;
+}
+.pin-key:hover { background: #2e2e2a; border-color: var(--gold); color: var(--gold); }
+.pin-key:active { transform: scale(0.95); }
+.pin-key.clear { font-size: 12px; color: var(--muted); letter-spacing: 1px; }
+.pin-error {
+  color: #e07070; font-size: 12px; margin-top: 16px;
+  opacity: 0; transition: opacity 0.3s;
+}
+.pin-error.show { opacity: 1; }
+.pin-version { font-size: 10px; color: #3a3a34; margin-top: 24px; letter-spacing: 1px; }
+
+/* APP */
+#app { display: none; }
+
+/* TOP HEADER */
+.top-bar {
+  background: var(--dark);
+  border-bottom: 2px solid var(--gold);
+  padding: 0 32px;
+  display: flex; align-items: stretch;
+  height: 64px;
+  position: sticky; top: 0; z-index: 100;
+}
+.top-bar-left {
+  display: flex; align-items: center; gap: 20px;
+  flex: 1;
+}
+.top-bar-brand {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 10px; letter-spacing: 3.5px;
+  color: var(--gold); text-transform: uppercase;
+}
+.top-bar-divider { width: 1px; background: #3a3a34; height: 28px; }
+.top-bar-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px; color: var(--cream);
+  font-weight: 400; letter-spacing: 0.5px;
+}
+.top-bar-right {
+  display: flex; align-items: center; gap: 16px;
+}
+.top-search {
+  background: #2a2a26; border: 1px solid #3a3a34;
+  color: var(--cream); font-family: 'DM Sans', sans-serif;
+  font-size: 13px; padding: 7px 14px; border-radius: 3px;
+  width: 220px; outline: none;
+  transition: border-color 0.2s;
+}
+.top-search::placeholder { color: #5a5a52; }
+.top-search:focus { border-color: var(--gold); }
+.top-search-icon { color: var(--muted); font-size: 14px; margin-right: -28px; z-index:1; position:relative; left: 24px; pointer-events:none; }
+.lock-btn {
+  background: none; border: 1px solid #3a3a34;
+  color: var(--muted); font-size: 11px; letter-spacing: 1px;
+  padding: 6px 14px; border-radius: 3px; cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: all 0.15s;
+}
+.lock-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+/* STAT BAR */
+.stat-bar {
+  background: var(--dark-mid);
+  border-bottom: 1px solid #3a3a34;
+  padding: 0 32px;
+  display: flex; align-items: center; gap: 0;
+}
+.stat-item {
+  padding: 12px 28px 12px 0;
+  border-right: 1px solid #3a3a34;
+  margin-right: 28px;
+}
+.stat-item:last-child { border-right: none; }
+.stat-val { font-size: 24px; font-weight: 500; color: var(--cream); line-height: 1; }
+.stat-lbl { font-size: 10px; color: var(--muted); letter-spacing: 1.5px; text-transform: uppercase; margin-top: 3px; }
+.stat-gold .stat-val { color: var(--gold); }
+
+/* FILTER BAR */
+.filter-bar {
+  background: var(--cream-dark);
+  border-bottom: 1px solid var(--border);
+  padding: 10px 32px;
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.filter-label { font-size: 10px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-right: 4px; }
+.filter-pill {
+  font-size: 11px; padding: 5px 14px; border-radius: 20px;
+  border: 1px solid var(--border);
+  background: var(--white); color: var(--mid);
+  cursor: pointer; transition: all 0.15s;
+  font-family: 'DM Sans', sans-serif;
+  letter-spacing: 0.3px;
+}
+.filter-pill:hover { border-color: var(--gold); color: var(--gold-text, var(--gold)); }
+.filter-pill.active-a { background: var(--tier-a-bg); color: var(--tier-a-text); border-color: var(--tier-a-border); font-weight: 500; }
+.filter-pill.active-b { background: var(--tier-b-bg); color: var(--tier-b-text); border-color: var(--tier-b-border); font-weight: 500; }
+.filter-pill.active-c { background: var(--tier-c-bg); color: var(--tier-c-text); border-color: var(--tier-c-border); font-weight: 500; }
+.filter-pill.active-dw { background: var(--dw-bg); color: var(--dw-text); border-color: var(--dw-border); font-weight: 500; }
+.filter-pill.clear-btn { margin-left: auto; border-style: dashed; }
+
+/* MAIN LAYOUT */
+.main-layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  min-height: calc(100vh - 160px);
+}
+
+/* SIDEBAR */
+.sidebar {
+  background: var(--white);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  position: sticky;
+  top: 64px;
+  height: calc(100vh - 64px);
+}
+.sidebar-section-label {
+  font-size: 9px; letter-spacing: 2.5px; text-transform: uppercase;
+  color: var(--muted); padding: 16px 20px 8px;
+  border-bottom: 1px solid var(--border);
+  background: var(--cream-dark);
+  position: sticky; top: 0; z-index: 1;
+}
+.dept-item {
+  padding: 12px 20px; cursor: pointer;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.12s;
+  border-left: 3px solid transparent;
+}
+.dept-item:hover { background: var(--cream); }
+.dept-item.active {
+  background: var(--gold-pale);
+  border-left-color: var(--gold);
+}
+.dept-name {
+  font-size: 13px; font-weight: 500; color: var(--dark);
+  line-height: 1.3;
+}
+.dept-item.active .dept-name { color: var(--gold); }
+.dept-meta { display: flex; gap: 6px; margin-top: 4px; align-items: center; }
+.dept-count { font-size: 11px; color: var(--muted); }
+.dept-tiers { display: flex; gap: 3px; }
+.mini-badge {
+  font-size: 9px; padding: 1px 5px; border-radius: 8px; font-weight: 500;
+}
+.mini-a { background: var(--tier-a-bg); color: var(--tier-a-text); }
+.mini-b { background: var(--tier-b-bg); color: var(--tier-b-text); }
+.mini-c { background: var(--tier-c-bg); color: var(--tier-c-text); }
+.mini-dw { background: var(--dw-bg); color: var(--dw-text); }
+
+/* CONTENT */
+.content-area { padding: 0; background: var(--cream); }
+
+.dept-header {
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+  padding: 24px 32px 20px;
+}
+.dept-header-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.dept-header-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 26px; font-weight: 500; color: var(--dark);
+  letter-spacing: 0.3px;
+}
+.dept-header-sub { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.dept-stats { display: flex; gap: 16px; margin-top: 14px; }
+.dept-stat {
+  background: var(--cream-dark); border-radius: 3px;
+  padding: 8px 16px; text-align: center;
+  border: 1px solid var(--border);
+}
+.dept-stat-val { font-size: 18px; font-weight: 500; color: var(--dark); }
+.dept-stat-lbl { font-size: 10px; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; }
+
+.print-btn {
+  background: none; border: 1px solid var(--border);
+  color: var(--mid); font-family: 'DM Sans', sans-serif;
+  font-size: 11px; padding: 7px 16px; border-radius: 3px;
+  cursor: pointer; letter-spacing: 0.5px;
+  transition: all 0.15s; white-space: nowrap;
+}
+.print-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+/* STAFF CARDS */
+.cards-grid { padding: 24px 32px; display: flex; flex-direction: column; gap: 16px; }
+
+.staff-card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  overflow: hidden;
+  transition: box-shadow 0.2s;
+}
+.staff-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+
+.staff-card-header {
+  padding: 16px 20px;
+  display: flex; align-items: flex-start; justify-content: space-between; gap: 12px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer; user-select: none;
+}
+.staff-card-left { display: flex; align-items: center; gap: 14px; }
+.staff-avatar {
+  width: 40px; height: 40px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 15px; font-weight: 600;
+  flex-shrink: 0;
+}
+.avatar-a { background: var(--tier-a-bg); color: var(--tier-a-text); }
+.avatar-b { background: var(--tier-b-bg); color: var(--tier-b-text); }
+.avatar-c { background: var(--tier-c-bg); color: var(--tier-c-text); }
+.avatar-dw { background: var(--dw-bg); color: var(--dw-text); }
+
+.staff-name { font-size: 15px; font-weight: 500; color: var(--dark); }
+.staff-role { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.staff-card-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+
+.tier-badge {
+  font-size: 10px; font-weight: 500; padding: 3px 10px; border-radius: 10px;
+  letter-spacing: 0.5px;
+}
+.tier-a { background: var(--tier-a-bg); color: var(--tier-a-text); border: 1px solid var(--tier-a-border); }
+.tier-b { background: var(--tier-b-bg); color: var(--tier-b-text); border: 1px solid var(--tier-b-border); }
+.tier-c { background: var(--tier-c-bg); color: var(--tier-c-text); border: 1px solid var(--tier-c-border); }
+.tier-dw { background: var(--dw-bg); color: var(--dw-text); border: 1px solid var(--dw-border); }
+
+.dw-tag {
+  font-size: 9px; letter-spacing: 1px; text-transform: uppercase;
+  color: var(--dw-text); background: var(--dw-bg);
+  padding: 2px 7px; border-radius: 8px;
+  border: 1px solid var(--dw-border);
+}
+
+.chevron { font-size: 12px; color: var(--muted); transition: transform 0.2s; }
+.chevron.open { transform: rotate(180deg); }
+
+/* KPI BODY */
+.staff-card-body { display: none; padding: 0; }
+.staff-card-body.open { display: block; }
+
+.kpi-section-label {
+  font-size: 9px; letter-spacing: 2.5px; text-transform: uppercase;
+  color: var(--muted); padding: 12px 20px 8px;
+  border-bottom: 1px solid var(--border);
+  background: var(--cream-dark);
+}
+
+.kpi-meta-row {
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  gap: 0; border-bottom: 1px solid var(--border);
+}
+.kpi-meta-cell {
+  padding: 12px 20px; border-right: 1px solid var(--border);
+}
+.kpi-meta-cell:last-child { border-right: none; }
+.kpi-meta-label { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.kpi-meta-value { font-size: 13px; font-weight: 500; color: var(--dark); }
+
+.kpi-list { padding: 4px 0 8px; }
+.kpi-row {
+  display: grid;
+  grid-template-columns: 28px 1fr 180px 120px 110px;
+  align-items: start;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--border);
+  gap: 12px;
+  transition: background 0.12s;
+}
+.kpi-row:hover { background: var(--cream); }
+.kpi-row:last-child { border-bottom: none; }
+.kpi-num {
+  font-size: 11px; color: var(--muted);
+  font-family: 'Cormorant Garamond', serif;
+  padding-top: 1px;
+}
+.kpi-name { font-size: 13px; color: var(--dark); font-weight: 500; line-height: 1.4; }
+.kpi-target { font-size: 12px; color: var(--mid); line-height: 1.4; }
+.kpi-source {
+  font-size: 11px; color: var(--gold);
+  background: var(--gold-pale); padding: 3px 8px;
+  border-radius: 3px; line-height: 1.4;
+  border: 1px solid #e8d090;
+}
+.kpi-freq {
+  font-size: 11px; color: var(--mid);
+  background: var(--cream-dark); padding: 3px 8px;
+  border-radius: 3px; text-align: center;
+  border: 1px solid var(--border);
+}
+.kpi-status-pending {
+  font-size: 10px; letter-spacing: 1px; text-transform: uppercase;
+  color: var(--muted); padding: 3px 8px;
+  border: 1px dashed var(--border); border-radius: 3px;
+  text-align: center;
+}
+
+.kpi-col-header {
+  display: grid;
+  grid-template-columns: 28px 1fr 180px 120px 110px;
+  gap: 12px; padding: 8px 20px;
+  background: var(--cream-dark);
+  border-bottom: 1px solid var(--border);
+}
+.kpi-col-lbl { font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+
+/* EMPTY STATE */
+.empty-state {
+  padding: 80px 32px; text-align: center; color: var(--muted);
+}
+.empty-icon { font-size: 40px; margin-bottom: 16px; opacity: 0.4; }
+.empty-text { font-size: 14px; }
+
+/* PRINT */
+@media print {
+  #pin-screen, .top-bar, .filter-bar, .sidebar, .print-btn, .lock-btn { display: none !important; }
+  .main-layout { grid-template-columns: 1fr; }
+  .staff-card-body { display: block !important; }
+  .content-area { padding: 0; }
+  body { background: white; }
+}
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--cream-dark); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* NO RESULTS */
+.no-results {
+  padding: 60px 32px; text-align: center;
+  color: var(--muted); font-size: 14px;
+}
+</style>
+</head>
+<body>
+
+<!-- PIN SCREEN -->
+<div id="pin-screen">
+  <div class="pin-box">
+    <div class="pin-logo">Samsons Group of Companies</div>
+    <div class="pin-title">KPI Master Portal</div>
+    <div class="pin-sub">Malam Jabba Ski Resort &mdash; Restricted Access</div>
+    <div class="pin-dots">
+      <div class="pin-dot" id="d0"></div>
+      <div class="pin-dot" id="d1"></div>
+      <div class="pin-dot" id="d2"></div>
+      <div class="pin-dot" id="d3"></div>
+    </div>
+    <div class="pin-pad">
+      <button class="pin-key" onclick="pinPress(1)">1</button>
+      <button class="pin-key" onclick="pinPress(2)">2</button>
+      <button class="pin-key" onclick="pinPress(3)">3</button>
+      <button class="pin-key" onclick="pinPress(4)">4</button>
+      <button class="pin-key" onclick="pinPress(5)">5</button>
+      <button class="pin-key" onclick="pinPress(6)">6</button>
+      <button class="pin-key" onclick="pinPress(7)">7</button>
+      <button class="pin-key" onclick="pinPress(8)">8</button>
+      <button class="pin-key" onclick="pinPress(9)">9</button>
+      <button class="pin-key clear" onclick="pinClear()">CLR</button>
+      <button class="pin-key" onclick="pinPress(0)">0</button>
+      <button class="pin-key clear" onclick="pinBack()">&#9003;</button>
+    </div>
+    <div class="pin-error" id="pin-error">Incorrect PIN. Please try again.</div>
+    <div class="pin-version">MJSR-KPI-MASTER &nbsp;|&nbsp; v1.0 &nbsp;|&nbsp; Phase 1</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+
+  <!-- TOP BAR -->
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <div class="top-bar-brand">Samsons Group &nbsp;|&nbsp; MJSR</div>
+      <div class="top-bar-divider"></div>
+      <div class="top-bar-title">KPI Master Directory</div>
+    </div>
+    <div class="top-bar-right">
+      <input class="top-search" type="search" id="search-input" placeholder="Search staff, role, department..." oninput="render()">
+      <button class="lock-btn" onclick="lockPortal()">LOCK</button>
+    </div>
+  </div>
+
+  <!-- STAT BAR -->
+  <div class="stat-bar" id="stat-bar"></div>
+
+  <!-- FILTER BAR -->
+  <div class="filter-bar">
+    <span class="filter-label">Filter</span>
+    <button class="filter-pill" id="pill-a" onclick="toggleFilter('A')">Tier A &mdash; Senior</button>
+    <button class="filter-pill" id="pill-b" onclick="toggleFilter('B')">Tier B &mdash; Mid Management</button>
+    <button class="filter-pill" id="pill-c" onclick="toggleFilter('C')">Tier C &mdash; Operational</button>
+    <button class="filter-pill" id="pill-dw" onclick="toggleFilter('DW')">Daily Wage</button>
+    <button class="filter-pill clear-btn" onclick="clearFilters()">Clear filters</button>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main-layout">
+    <div class="sidebar">
+      <div class="sidebar-section-label">Departments</div>
+      <div id="sidebar-list"></div>
+    </div>
+    <div class="content-area" id="content-area">
+      <div class="empty-state">
+        <div class="empty-icon">&#9776;</div>
+        <div class="empty-text">Select a department from the sidebar</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────────────────────────
+
+const STAFF = [
+  {name:"Martin Schultz",dept:"Resort Senior Management",role:"General Manager Ski Resort",tier:"A",dw:false},
+  {name:"Shahzad Alam",dept:"Resort Senior Management",role:"DGM Ski Resort",tier:"A",dw:false},
+  {name:"Muhammad Hammad",dept:"Islamabad Office",role:"Head of Finance",tier:"A",dw:false},
+  {name:"Ghazan Inayat",dept:"Islamabad Office",role:"Market and Media Manager",tier:"A",dw:false},
+  {name:"Ali Pervaiz",dept:"Islamabad Office",role:"Marketing Executive Operations",tier:"C",dw:false},
+  {name:"Muhammad Ibrahim",dept:"Islamabad Office",role:"Marketing Officer",tier:"C",dw:false},
+  {name:"Zaid Khan",dept:"Islamabad Office",role:"Sr. Manager HR",tier:"A",dw:false},
+  {name:"Mehmoona Khaliq",dept:"Islamabad Office",role:"HR Executive",tier:"C",dw:false},
+  {name:"Asfand Ali",dept:"Islamabad Office",role:"GM Legal",tier:"A",dw:false},
+  {name:"Sadaqat Ahmed",dept:"Islamabad Office",role:"Sr. Executive Assistant",tier:"A",dw:false},
+  {name:"Saad Asim",dept:"Islamabad Office",role:"Legal Manager",tier:"A",dw:false},
+  {name:"Pir Waris Shah",dept:"Legal & PR",role:"Manager Legal And PR",tier:"A",dw:false},
+  {name:"Ashfaq",dept:"Administration, Security & Procurement",role:"Assistant Manager Admin",tier:"B",dw:false},
+  {name:"Abid Nawaz",dept:"Administration, Security & Procurement",role:"Admin HR Executive",tier:"B",dw:false},
+  {name:"Raheem Khan",dept:"Administration, Security & Procurement",role:"Dispenser",tier:"C",dw:false},
+  {name:"Farakh Shad",dept:"Administration, Security & Procurement",role:"Care Taker - Guest House",tier:"C",dw:false},
+  {name:"Farhan Malik",dept:"Administration, Security & Procurement",role:"Purchaser",tier:"C",dw:false},
+  {name:"Abdur Raheem",dept:"Administration, Security & Procurement",role:"Purchaser",tier:"C",dw:false},
+  {name:"Fazal Wahab",dept:"Administration, Security & Procurement",role:"Driver",tier:"C",dw:false},
+  {name:"Muhammad Ghafoor",dept:"Administration, Security & Procurement",role:"Imam Masjid",tier:"C",dw:false},
+  {name:"Azam Khan",dept:"Administration, Security & Procurement",role:"Driver",tier:"C",dw:false},
+  {name:"Muhammad Inam",dept:"Administration, Security & Procurement",role:"Malam Masjid Imam",tier:"C",dw:false},
+  {name:"Said Kamal",dept:"Administration, Security & Procurement",role:"Driver",tier:"C",dw:false},
+  {name:"Adnan Bacha",dept:"Administration, Security & Procurement",role:"Plumber",tier:"C",dw:false},
+  {name:"Iqbal Aslam",dept:"Resort Security",role:"Security Manager",tier:"A",dw:false},
+  {name:"Habiba Jan",dept:"Resort Security",role:"Lady Searcher",tier:"C",dw:false},
+  {name:"Muhammad Tariq",dept:"Accounts & Finance",role:"Manager Finance & Accounts",tier:"A",dw:false},
+  {name:"Arsalan Raheem",dept:"Accounts & Finance",role:"Manager Finance & Accounts",tier:"A",dw:false},
+  {name:"Tariq Amin",dept:"Accounts & Finance",role:"Sr. Accounts Officer (Site)",tier:"B",dw:false},
+  {name:"Muhammad Awais",dept:"Accounts & Finance",role:"Jr. Accounts Officer (Site)",tier:"C",dw:false},
+  {name:"Hamza",dept:"Accounts & Finance",role:"Accountant",tier:"C",dw:false},
+  {name:"Mansoor Ahmad",dept:"Accounts & Finance",role:"Assistant Accountant",tier:"C",dw:false},
+  {name:"Ms Tehmina Rashid",dept:"Internal Audit",role:"Head Of Internal Audit",tier:"A",dw:false},
+  {name:"Mr Saqib Javaid",dept:"Internal Audit",role:"Manager Internal Audit",tier:"A",dw:false},
+  {name:"Mr Ahmed Qureshi",dept:"Internal Audit",role:"Manager Internal Audit",tier:"A",dw:false},
+  {name:"Mr. Sohail Ahmed",dept:"Internal Audit",role:"Assistant Manager Internal Audit",tier:"B",dw:false},
+  {name:"Mr Afnan Zaman",dept:"Internal Audit",role:"Audit Executive",tier:"C",dw:false},
+  {name:"Mr Qasim Ali",dept:"Internal Audit",role:"Audit Executive",tier:"C",dw:false},
+  {name:"Mr Ihtisham-Ul-Haq",dept:"Internal Audit",role:"Audit Executive",tier:"C",dw:false},
+  {name:"Raheel Alam",dept:"Internal Audit",role:"Audit Executive",tier:"C",dw:false},
+  {name:"Tahir Hussain",dept:"Internal Audit",role:"Audit Executive",tier:"C",dw:false},
+  {name:"Bilal Tariq",dept:"Technical",role:"Senior Technical Manager",tier:"A",dw:false},
+  {name:"Nasir Khan",dept:"Technical",role:"Store Keeper",tier:"C",dw:false},
+  {name:"Ibrar",dept:"Chairlift & Machinery",role:"Chairlift Operator",tier:"C",dw:false},
+  {name:"Mohammad Anwar",dept:"Chairlift & Machinery",role:"Loading Base Station",tier:"C",dw:false},
+  {name:"Airab Hussain",dept:"Chairlift & Machinery",role:"Loading Base Station",tier:"C",dw:false},
+  {name:"Habib Ullah",dept:"Chairlift & Machinery",role:"Loading Return Station",tier:"C",dw:false},
+  {name:"Hazrat Hussain",dept:"Chairlift & Machinery",role:"Loading Return Station",tier:"C",dw:false},
+  {name:"Adnan Khan",dept:"Civil & Construction",role:"Civil Engineer",tier:"B",dw:false},
+  {name:"Akram Khan",dept:"Electrical & Engineering",role:"Electrical Engineer",tier:"B",dw:false},
+  {name:"Muhammad Ishtiaq",dept:"Electrical & Engineering",role:"Electrical Engineer",tier:"B",dw:false},
+  {name:"Syed Asif Ali Shah",dept:"Electrical & Engineering",role:"Assistant Manager Engineering",tier:"B",dw:false},
+  {name:"Ismail Khan",dept:"Electrical & Engineering",role:"Technician",tier:"C",dw:false},
+  {name:"Gohar Zaman",dept:"Electrical & Engineering",role:"Electrician",tier:"C",dw:false},
+  {name:"Hussain Ahmad",dept:"Electrical & Engineering",role:"Electrical Operator",tier:"C",dw:false},
+  {name:"Naveed Khan",dept:"Electrical & Engineering",role:"Electrical Operator",tier:"C",dw:false},
+  {name:"Jamal Ahmad",dept:"Food Stores & Treasury",role:"Food Store Keeper",tier:"C",dw:false},
+  {name:"Rashid Ali",dept:"Food Stores & Treasury",role:"Store Keeper Helper",tier:"C",dw:false},
+  {name:"Muhammad Momin Babar",dept:"Restaurant (F&B)",role:"Incharge F&B",tier:"A",dw:false},
+  {name:"Abcar Hussain",dept:"Restaurant (F&B)",role:"F&B Manager",tier:"B",dw:false},
+  {name:"Asad Ullah",dept:"Restaurant (F&B)",role:"F&B Asst. Manager",tier:"B",dw:false},
+  {name:"Asmat Ali",dept:"Restaurant (F&B)",role:"F&B Supervisor",tier:"C",dw:false},
+  {name:"Zahir Shah",dept:"Restaurant (F&B)",role:"Kababi",tier:"C",dw:false},
+  {name:"Suliman Khan",dept:"Restaurant (F&B)",role:"Chef",tier:"C",dw:false},
+  {name:"Lal Zada",dept:"Restaurant (F&B)",role:"Tea Seller",tier:"C",dw:false},
+  {name:"Sheikh Rasheed",dept:"Restaurant (F&B)",role:"F&B Asst. Manager",tier:"C",dw:false},
+  {name:"Anwar Ali",dept:"Restaurant (F&B)",role:"Waiter",tier:"C",dw:false},
+  {name:"Said Ali Shah",dept:"Restaurant (F&B)",role:"Restaurant Housekeeper",tier:"C",dw:false},
+  {name:"Irshad",dept:"Restaurant (F&B)",role:"Burger Seller",tier:"C",dw:false},
+  {name:"Laiq Zada",dept:"Restaurant (F&B)",role:"Dish Washer",tier:"C",dw:false},
+  {name:"Amjad Ali",dept:"Restaurant (F&B)",role:"Waiter",tier:"C",dw:false},
+  {name:"Nizam Uddin",dept:"Restaurant (F&B)",role:"Waiter",tier:"C",dw:false},
+  {name:"Fayaz Muhammad",dept:"Restaurant (F&B)",role:"Waiter",tier:"C",dw:false},
+  {name:"Akhtar Sadiq",dept:"Restaurant (F&B)",role:"Cashier",tier:"C",dw:false},
+  {name:"Muhammad Saeed",dept:"Sales & Services",role:"Ride Operator",tier:"C",dw:false},
+  {name:"Muhammad Haroon",dept:"Sales & Services",role:"CSR",tier:"C",dw:false},
+  {name:"Amna Zahid",dept:"Sales & Services",role:"CSR",tier:"C",dw:false},
+  {name:"Alishba",dept:"Sales & Services",role:"CSR",tier:"C",dw:false},
+  {name:"Abeera Ejaz",dept:"Sales & Services",role:"CSR",tier:"C",dw:false},
+  {name:"Shahid Ali",dept:"Sales & Services",role:"Resort Photographer",tier:"C",dw:false},
+  {name:"Hamza Khan",dept:"Sales & Services",role:"Ride Operator",tier:"C",dw:false},
+  {name:"Aqib Khan",dept:"Sales & Services",role:"CSR",tier:"C",dw:false},
+  {name:"Bawar Hussain",dept:"Samsons Inn",role:"Front Desk Manager",tier:"B",dw:false},
+  {name:"Sardar Ali",dept:"Samsons Inn",role:"Cook Helper",tier:"C",dw:false},
+  {name:"Mehboob Ali",dept:"Samsons Inn",role:"Cook",tier:"C",dw:false},
+  {name:"Amir Sultan",dept:"Malam House",role:"Care Taker",tier:"C",dw:false},
+  {name:"Khairo Rehman",dept:"Daily Wage - Civil",role:"Civil Supervisor",tier:"C",dw:true},
+  {name:"Khan Said",dept:"Daily Wage - Civil",role:"Mason",tier:"C",dw:true},
+  {name:"Wazir Zada",dept:"Daily Wage - Civil",role:"Labour",tier:"C",dw:true},
+  {name:"Ali Bacha",dept:"Daily Wage - Civil",role:"Labour",tier:"C",dw:true},
+  {name:"Habib Ullah (DW)",dept:"Daily Wage - Admin",role:"Cleaner",tier:"C",dw:true},
+  {name:"Zahir Ullah",dept:"Daily Wage - Admin",role:"Cleaner",tier:"C",dw:true},
+  {name:"Kashif Khan",dept:"Daily Wage - Admin",role:"Washroom Cleaner",tier:"C",dw:true},
+  {name:"Khan Bacha",dept:"Daily Wage - Admin",role:"Cleaner",tier:"C",dw:true},
+  {name:"Murad Ullah",dept:"Daily Wage - Admin",role:"Dispenser",tier:"C",dw:true},
+  {name:"Abbas Khan",dept:"Daily Wage - Admin",role:"Washroom Cleaner",tier:"C",dw:true},
+  {name:"Jamal Said",dept:"Daily Wages - Restaurant",role:"Cook",tier:"C",dw:true},
+  {name:"Amin Ullah",dept:"Daily Wages - Restaurant",role:"Waiter",tier:"C",dw:true},
+  {name:"Anwar Ali (DWR)",dept:"Daily Wages - Restaurant",role:"Dish Washer",tier:"C",dw:true},
+  {name:"Aman Ullah",dept:"Daily Wages - Restaurant",role:"Waiter",tier:"C",dw:true},
+  {name:"Israr Hussain",dept:"Daily Wages - Restaurant",role:"Tandoorchi",tier:"C",dw:true},
+  {name:"Iftikhar Hussain",dept:"Daily Wages - Restaurant",role:"Waiter",tier:"C",dw:true},
+  {name:"Azim Ullah",dept:"Daily Wages - Restaurant",role:"Pakora Maker",tier:"C",dw:true},
+  {name:"Ikram Ullah",dept:"Daily Wages - Restaurant",role:"Waiter",tier:"C",dw:true},
+  {name:"Akbar Ali",dept:"Daily Wages - Restaurant",role:"Dish Washer",tier:"C",dw:true},
+  {name:"Subhan Ullah",dept:"Daily Wages - Restaurant",role:"Tandoorchi",tier:"C",dw:true},
+  {name:"Barkat Ali (Rest)",dept:"Daily Wages - Restaurant",role:"Tandoorchi",tier:"C",dw:true},
+  {name:"Ayaz Ahmad",dept:"Daily Wages - Restaurant",role:"Waiter",tier:"C",dw:true},
+  {name:"Islam Ullah",dept:"Daily Wages - Restaurant",role:"Dish Washer",tier:"C",dw:true},
+  {name:"Anwar",dept:"Daily Wages - Restaurant",role:"Guest House Cook",tier:"C",dw:true},
+  {name:"Irfan Ullah",dept:"Daily Wage - Samsons Inn",role:"Waiter",tier:"C",dw:true},
+  {name:"Murad Ali",dept:"Daily Wage - Samsons Inn",role:"Dish Washer",tier:"C",dw:true},
+  {name:"Muhib Ullah",dept:"Daily Wage - Water Source",role:"Water Pump Operator",tier:"C",dw:true},
+  {name:"Akbar Aman",dept:"Daily Wage - Zipline",role:"Zipline Operator",tier:"C",dw:true},
+  {name:"Imran Khan",dept:"Daily Wage - Zipline",role:"Zipline Operator",tier:"C",dw:true},
+  {name:"Noman Hussain",dept:"Daily Wage - Zipline",role:"Zipline Operator",tier:"C",dw:true},
+  {name:"Noman Khan",dept:"Daily Wage - Giant Swing",role:"Giant Swing Operator",tier:"C",dw:true},
+  {name:"Riaz Khan",dept:"Daily Wage - Giant Swing",role:"Giant Swing Operator",tier:"C",dw:true},
+  {name:"Ajeeb Ullah",dept:"Daily Wage - Green Valley",role:"Labour",tier:"C",dw:true},
+  {name:"Khan Muhammad",dept:"Daily Wage - Green Valley",role:"GV Cleaner",tier:"C",dw:true},
+  {name:"Yousaf Khan",dept:"Daily Wage - Green Valley",role:"Ferris Wheel Operator",tier:"C",dw:true},
+  {name:"Naseeb Rahman",dept:"Daily Wage - Green Valley",role:"Ferris Wheel Operator",tier:"C",dw:true},
+  {name:"Rahim Ullah",dept:"Daily Wage - Green Valley",role:"Kids Zip Line Operator",tier:"C",dw:true},
+  {name:"Barkat Ali (GV)",dept:"Daily Wage - Green Valley",role:"Kids Zip Line Operator",tier:"C",dw:true},
+  {name:"Ismail",dept:"Daily Wage - Green Valley",role:"Tuby Operator",tier:"C",dw:true},
+];
+
+// KPI definitions: each entry has name, target, source (evidence), frequency
+const KPIS = {
+  "General Manager Ski Resort": [
+    {n:"Resort P&L vs monthly budget",t:"Variance within 5%",s:"Monthly Finance Report (Hammad)",f:"Monthly"},
+    {n:"Resort-wide safety incident rate",t:"Zero lost-time incidents per month",s:"Security Incident Log / Chairlift Portal",f:"Monthly"},
+    {n:"Staff KPI submission compliance",t:"100% of Tier A and B submit on time",s:"KPI Master Portal submission log",f:"Monthly"},
+    {n:"Digital portal suite uptime",t:"All portals operational 95%+ of days",s:"GitHub Pages uptime / GAS error log",f:"Monthly"},
+    {n:"Seasonal readiness checklist",t:"100% complete before season opening",s:"GM Pre-Season Readiness Report (upload)",f:"Seasonal"},
+    {n:"Guest satisfaction aggregate",t:"Positive feedback rate above 80%",s:"Google Business Profile / feedback log",f:"Monthly"},
+    {n:"Strategic project milestone delivery",t:"On-time delivery of agreed milestones",s:"Project tracker / board report (upload)",f:"Monthly"},
+    {n:"Monthly CEO report submission",t:"Submitted by 5th of following month",s:"Email submission log / document upload",f:"Monthly"},
+  ],
+  "DGM Ski Resort": [
+    {n:"Total sales revenue vs monthly target",t:"Achieve 100% of monthly sales target",s:"Daily Sales Tracker (Samsons Digital)",f:"Monthly"},
+    {n:"Visitor yield per entry",t:"PKR target per visitor (seasonally set)",s:"Tourist Vehicle Count Portal + Sales Tracker",f:"Monthly"},
+    {n:"Online ticket revenue share",t:"Online sales above 15% of total",s:"FooEvents booking report",f:"Monthly"},
+    {n:"Daily checklist compliance (all booths)",t:"100% submission rate across all 4 booths",s:"MJSR Daily Readiness Checklist Portal",f:"Weekly"},
+    {n:"Egate throughput accuracy",t:"Zero unrecorded entries across 7 lanes",s:"Egate count log",f:"Weekly"},
+    {n:"Group booking conversion rate",t:"Above 40% of leads convert",s:"Group Bookings CRM Portal",f:"Monthly"},
+    {n:"Team target achievement",t:"All booth staff hit individual targets",s:"Activity Sales Tracker (Samsons Digital)",f:"Monthly"},
+  ],
+  "Head of Finance": [
+    {n:"Budget vs actual variance",t:"Monthly variance within 8%",s:"Monthly Management Accounts (upload)",f:"Monthly"},
+    {n:"Cash flow forecast accuracy",t:"Forecast within 10% of actual",s:"Finance report submitted to GM",f:"Monthly"},
+    {n:"Financial report timeliness",t:"Submitted by 5th of following month",s:"Email/document submission timestamp",f:"Monthly"},
+    {n:"Group P&L consolidation accuracy",t:"Zero restatements after submission",s:"Consolidated P&L report (upload)",f:"Monthly"},
+    {n:"Audit finding response rate",t:"100% of findings responded to within 14 days",s:"Internal Audit finding log",f:"Monthly"},
+  ],
+  "Market and Media Manager": [
+    {n:"Social media reach vs target",t:"Monthly reach target (platform-specific)",s:"Meta Business Suite export (upload)",f:"Monthly"},
+    {n:"Content calendar adherence",t:"95%+ of planned posts published on time",s:"Content calendar log / Meta Insights",f:"Monthly"},
+    {n:"Google Business Profile review score",t:"Maintain rating above 4.2",s:"GBP dashboard screenshot (upload)",f:"Monthly"},
+    {n:"Campaign ROI",t:"Positive ROI on all paid campaigns",s:"Meta Ads Manager report (upload)",f:"Monthly"},
+    {n:"Monthly performance report submission",t:"Submitted to GM by 5th of following month",s:"Document upload to KPI portal",f:"Monthly"},
+    {n:"Online booking traffic contribution",t:"Digital channels drive above 20% of bookings",s:"FooEvents referral data / analytics",f:"Monthly"},
+  ],
+  "Marketing Executive Operations": [
+    {n:"Campaign execution vs plan",t:"100% of assigned campaigns executed on schedule",s:"Campaign tracker / manager sign-off",f:"Monthly"},
+    {n:"Social post frequency vs calendar",t:"Zero missed scheduled posts",s:"Meta Business Suite post history",f:"Weekly"},
+    {n:"Asset delivery turnaround",t:"All creative assets delivered within 48 hours of brief",s:"Project log / manager confirmation",f:"Monthly"},
+    {n:"Engagement rate per post",t:"Above platform benchmark (Instagram 3%+)",s:"Meta Insights export",f:"Monthly"},
+  ],
+  "Marketing Officer": [
+    {n:"Post scheduling accuracy",t:"100% of posts scheduled at correct time",s:"Meta Business Suite scheduling log",f:"Weekly"},
+    {n:"DM and comment response time",t:"All DMs and comments responded within 4 hours",s:"Meta Business Suite inbox log",f:"Weekly"},
+    {n:"Monthly analytics report",t:"Submitted to manager by end of month",s:"Report document upload",f:"Monthly"},
+    {n:"Content library organisation",t:"All assets filed and labelled per SOP",s:"Google Drive folder audit",f:"Monthly"},
+  ],
+  "Sr. Manager HR": [
+    {n:"Group headcount vs establishment",t:"Variance within 2 positions at all times",s:"HR headcount report (upload)",f:"Monthly"},
+    {n:"Recruitment SLA compliance",t:"Vacancies filled within agreed timeline",s:"Recruitment tracker / offer letter log",f:"Monthly"},
+    {n:"Training completion rate",t:"100% of mandatory training completed on time",s:"Training register (upload)",f:"Monthly"},
+    {n:"Grievance resolution time",t:"All grievances resolved within 7 working days",s:"HR grievance log",f:"Monthly"},
+    {n:"HR policy update frequency",t:"All policies reviewed annually; updates communicated",s:"Policy register with dates",f:"Quarterly"},
+  ],
+  "HR Executive": [
+    {n:"Leave application processing time",t:"All applications processed within 24 hours",s:"MJSR Leave Tracker portal log",f:"Weekly"},
+    {n:"Staff file currency",t:"100% of files complete and up to date",s:"HR file audit report",f:"Monthly"},
+    {n:"Attendance capture accuracy",t:"Zero missed daily attendance entries",s:"Attendance register / portal log",f:"Daily"},
+    {n:"Onboarding checklist completion",t:"100% of new joiners fully onboarded within 5 days",s:"Onboarding checklist (upload per joiner)",f:"Per hire"},
+  ],
+  "GM Legal": [
+    {n:"Legal case resolution rate",t:"All assigned cases actioned within agreed SLA",s:"Legal case tracker (upload)",f:"Monthly"},
+    {n:"Contract review turnaround",t:"All contracts reviewed within 5 working days",s:"Contract log with timestamps",f:"Monthly"},
+    {n:"Compliance advisory accuracy",t:"Zero compliance breaches attributable to legal advice",s:"Compliance audit report",f:"Monthly"},
+    {n:"Risk flagging lead time",t:"All risks flagged minimum 30 days before critical date",s:"Risk register (upload)",f:"Monthly"},
+  ],
+  "Sr. Executive Assistant": [
+    {n:"Correspondence turnaround SLA",t:"All correspondence actioned within 24 hours",s:"Email and letter log",f:"Weekly"},
+    {n:"Diary and meeting accuracy",t:"Zero missed or double-booked meetings",s:"Calendar audit / manager confirmation",f:"Weekly"},
+    {n:"Document filing compliance",t:"100% of documents filed within 24 hours of receipt",s:"Filing register",f:"Weekly"},
+    {n:"Task follow-up closure rate",t:"100% of assigned tasks closed on or before deadline",s:"Task log / manager sign-off",f:"Monthly"},
+  ],
+  "Legal Manager": [
+    {n:"Case file accuracy",t:"Zero errors in filed case documents",s:"Legal case file audit",f:"Monthly"},
+    {n:"Document turnaround SLA",t:"All documents delivered within agreed timeline",s:"Document log with dates",f:"Monthly"},
+    {n:"Filing and archiving compliance",t:"100% of files archived per SOP",s:"Archive register",f:"Monthly"},
+    {n:"Research output quality",t:"Research accepted by GM Legal without revision",s:"Manager sign-off",f:"Per assignment"},
+  ],
+  "Manager Legal And PR": [
+    {n:"Legal case management accuracy",t:"Zero missed deadlines on active cases",s:"Case tracker (upload)",f:"Monthly"},
+    {n:"PR coverage quality score",t:"All media coverage neutral or positive",s:"Monthly PR report (upload)",f:"Monthly"},
+    {n:"Government liaison response rate",t:"All government correspondence actioned within 48 hours",s:"Liaison log",f:"Monthly"},
+    {n:"Media monitoring report",t:"Submitted weekly to GM",s:"Weekly report document",f:"Weekly"},
+  ],
+  "Assistant Manager Admin": [
+    {n:"Document processing turnaround",t:"All documents processed within 24 hours",s:"Admin log",f:"Weekly"},
+    {n:"Staff attendance record accuracy",t:"Zero missing daily entries",s:"Attendance register",f:"Daily"},
+    {n:"Procurement request routing SLA",t:"All requests routed within 4 hours of receipt",s:"Procurement Hub portal log",f:"Weekly"},
+    {n:"Daily admin log completeness",t:"100% entries completed by end of each day",s:"Admin daily log",f:"Daily"},
+    {n:"Visitor coordination log",t:"Zero unlogged visitors to resort offices",s:"Visitor log book",f:"Daily"},
+  ],
+  "Admin HR Executive": [
+    {n:"Staff roster accuracy",t:"Roster matches actual deployment at all times",s:"Roster vs deployment check",f:"Weekly"},
+    {n:"Leave tracker compliance rate",t:"100% of leave entries posted within 24 hours",s:"MJSR Leave Tracker portal",f:"Weekly"},
+    {n:"F&F benefits portal accuracy",t:"Zero incorrect benefit entries",s:"MJSR F&F Benefits Portal log",f:"Monthly"},
+    {n:"Payroll submission timeliness",t:"Payroll inputs submitted by 25th each month",s:"Payroll submission confirmation",f:"Monthly"},
+  ],
+  "Dispenser": [
+    {n:"Drug issuance log accuracy",t:"Zero unrecorded dispensing events",s:"MJSR Clinic Dispensary Portal",f:"Daily"},
+    {n:"Stock count submission",t:"Daily count submitted before end of shift",s:"Clinic portal submission log",f:"Daily"},
+    {n:"Hygiene and storage compliance",t:"Pass monthly inspection",s:"Clinic inspection checklist",f:"Monthly"},
+    {n:"Punctuality and attendance",t:"Zero unexplained late arrivals or absences",s:"Attendance register",f:"Weekly"},
+  ],
+  "Care Taker - Guest House": [
+    {n:"Room and facility cleanliness",t:"Pass daily inspection checklist",s:"Housekeeping inspection log",f:"Daily"},
+    {n:"Guest complaint rate",t:"Zero housekeeping-attributable complaints",s:"Guest complaint log",f:"Weekly"},
+    {n:"Linen and supplies inventory",t:"Daily inventory count matches record",s:"Inventory log",f:"Daily"},
+    {n:"Punctuality and attendance",t:"Zero unexplained absences",s:"Attendance register",f:"Weekly"},
+  ],
+  "Purchaser": [
+    {n:"Purchase order accuracy",t:"Zero incorrect or incomplete POs raised",s:"Procurement Hub portal",f:"Weekly"},
+    {n:"Vendor SLA compliance",t:"95%+ of orders delivered on agreed date",s:"Delivery log / GRN record",f:"Monthly"},
+    {n:"Three-quote compliance",t:"100% of qualifying purchases have three quotes",s:"Procurement Hub portal",f:"Monthly"},
+    {n:"Delivery verification accuracy",t:"All deliveries verified and GRN raised same day",s:"GRN log in Procurement Hub",f:"Weekly"},
+  ],
+  "Driver": [
+    {n:"Trip log accuracy",t:"Every trip logged with departure and return time",s:"Vehicle fleet portal / trip log",f:"Daily"},
+    {n:"Vehicle defect reporting",t:"Any defect reported before next duty",s:"MJSR Vehicle and Machinery Fleet portal",f:"Per defect"},
+    {n:"Punctuality for assigned duties",t:"Zero late pickups or missed assignments",s:"Supervisor confirmation log",f:"Weekly"},
+    {n:"Zero accidents or traffic violations",t:"Zero incidents per month",s:"Security incident log",f:"Monthly"},
+  ],
+  "Imam Masjid": [
+    {n:"Prayer schedule adherence",t:"All five daily prayers held on time",s:"Supervisor daily confirmation",f:"Daily"},
+    {n:"Facility upkeep log",t:"Masjid cleaning checklist completed daily",s:"Facility log",f:"Daily"},
+    {n:"Punctuality and attendance",t:"Zero unexplained absences",s:"Attendance register",f:"Weekly"},
+  ],
+  "Malam Masjid Imam": [
+    {n:"Prayer schedule adherence",t:"All five daily prayers held on time",s:"Supervisor daily confirmation",f:"Daily"},
+    {n:"Facility upkeep log",t:"Masjid cleaning checklist completed daily",s:"Facility log",f:"Daily"},
+    {n:"Punctuality and attendance",t:"Zero unexplained absences",s:"Attendance register",f:"Weekly"},
+  ],
+  "Plumber": [
+    {n:"Work order completion rate",t:"100% of work orders closed within agreed timeframe",s:"Maintenance work order log",f:"Weekly"},
+    {n:"Zero repeat callouts on same fault",t:"No fault recurs within 30 days of fix",s:"Work order log",f:"Monthly"},
+    {n:"Parts requisition accuracy",t:"All parts requested match work order requirements",s:"Procurement Hub / parts log",f:"Monthly"},
+    {n:"Response time to fault calls",t:"On-site within 30 minutes of fault report",s:"Fault report log with timestamps",f:"Per callout"},
+  ],
+  "Security Manager": [
+    {n:"Checkpoint vehicle count accuracy",t:"CP data matches actual within 2% variance",s:"Tourist Vehicle Count Portal (3 checkpoints)",f:"Daily"},
+    {n:"Patrol coverage",t:"100% of patrol routes completed each shift",s:"Patrol log",f:"Daily"},
+    {n:"Incident report rate and resolution",t:"All incidents logged and resolved within 24 hours",s:"Security incident log",f:"Weekly"},
+    {n:"Emergency drill completion",t:"Minimum one drill per month",s:"Drill report (upload)",f:"Monthly"},
+    {n:"Monthly security audit score",t:"Score above 80% on monthly audit",s:"Security audit report (upload)",f:"Monthly"},
+    {n:"Staff deployment vs roster",t:"Zero unauthorised roster deviations",s:"Security roster vs deployment check",f:"Weekly"},
+  ],
+  "Lady Searcher": [
+    {n:"Shift attendance and punctuality",t:"Zero unexplained late arrivals or absences",s:"Attendance register",f:"Daily"},
+    {n:"Search log completion per shift",t:"100% of searches logged",s:"Security search log",f:"Daily"},
+    {n:"Zero security incidents",t:"No security breaches attributable to search post",s:"Incident log",f:"Weekly"},
+    {n:"Daily handover note",t:"Handover note completed at end of every shift",s:"Security handover log",f:"Daily"},
+  ],
+  "Manager Finance & Accounts": [
+    {n:"Monthly accounts reconciliation accuracy",t:"Zero unreconciled items at month end",s:"Monthly accounts report (upload)",f:"Monthly"},
+    {n:"Financial report timeliness",t:"Reports submitted by 5th of following month",s:"Document submission timestamp",f:"Monthly"},
+    {n:"Audit finding response rate",t:"100% of findings responded to within 7 days",s:"Audit finding log",f:"Monthly"},
+    {n:"Budget variance analysis",t:"Variance report submitted with management accounts",s:"Monthly report (upload)",f:"Monthly"},
+    {n:"Accounts payable and receivable SLA",t:"All AP/AR processed within agreed terms",s:"AP/AR ageing report",f:"Monthly"},
+  ],
+  "Sr. Accounts Officer (Site)": [
+    {n:"Daily cash reconciliation accuracy",t:"Zero variance between physical cash and ledger",s:"Daily cash reconciliation sheet",f:"Daily"},
+    {n:"Site expense log completeness",t:"All site expenses logged same day",s:"Site expense log",f:"Daily"},
+    {n:"Invoice processing turnaround",t:"All invoices processed within 24 hours of receipt",s:"Invoice log",f:"Weekly"},
+    {n:"Petty cash accuracy",t:"Petty cash balance matches record at all times",s:"Petty cash register",f:"Daily"},
+  ],
+  "Jr. Accounts Officer (Site)": [
+    {n:"Daily ledger entry accuracy",t:"Zero incorrect entries per day",s:"Ledger audit",f:"Daily"},
+    {n:"Receipt and voucher filing",t:"All filed within 24 hours",s:"Filing register",f:"Daily"},
+    {n:"Zero unrecorded transactions",t:"All transactions captured on day of occurrence",s:"Ledger audit",f:"Daily"},
+    {n:"Report submission timeliness",t:"All reports submitted by agreed deadline",s:"Report submission log",f:"Weekly"},
+  ],
+  "Accountant": [
+    {n:"Journal entry accuracy",t:"Zero errors on monthly journal entries",s:"Accounts review by manager",f:"Monthly"},
+    {n:"Bank reconciliation timeliness",t:"Reconciliation completed by 3rd of each month",s:"Bank rec report",f:"Monthly"},
+    {n:"Voucher accuracy",t:"Zero incorrect vouchers raised",s:"Voucher audit",f:"Monthly"},
+    {n:"Audit support turnaround",t:"All audit requests fulfilled within 24 hours",s:"Audit request log",f:"Per request"},
+  ],
+  "Assistant Accountant": [
+    {n:"Data entry accuracy",t:"Zero errors per week",s:"Manager data audit",f:"Weekly"},
+    {n:"Filing compliance",t:"All documents filed within 24 hours",s:"Filing register",f:"Daily"},
+    {n:"Report preparation support",t:"All assigned reports prepared on time",s:"Manager confirmation",f:"Monthly"},
+    {n:"Punctuality and attendance",t:"Zero unexplained absences",s:"Attendance register",f:"Weekly"},
+  ],
+  "Head Of Internal Audit": [
+    {n:"Annual audit plan completion",t:"100% of planned audits completed",s:"Audit plan vs completion report (upload)",f:"Monthly"},
+    {n:"Finding severity and rate",t:"High-severity findings resolved within 30 days",s:"Audit finding log",f:"Monthly"},
+    {n:"Departmental audit coverage",t:"All departments audited per annual plan",s:"Audit coverage tracker",f:"Quarterly"},
+    {n:"CEO escalation accuracy",t:"All material findings escalated within 48 hours",s:"Escalation log",f:"Per finding"},
+    {n:"Audit team productivity",t:"All assigned audits completed on time",s:"Audit assignment tracker",f:"Monthly"},
+  ],
+  "Manager Internal Audit": [
+    {n:"Audit assignment completion",t:"100% of assigned audits delivered on time",s:"Audit assignment log",f:"Monthly"},
+    {n:"Finding documentation quality",t:"All findings documented per audit SOP",s:"Head of Audit review",f:"Per audit"},
+    {n:"Follow-up closure rate",t:"All prior findings closed or escalated within 60 days",s:"Finding follow-up tracker",f:"Monthly"},
+    {n:"Report timeliness",t:"All reports submitted within 5 days of fieldwork completion",s:"Report submission log",f:"Per audit"},
+  ],
+  "Assistant Manager Internal Audit": [
+    {n:"Fieldwork completion",t:"All fieldwork tasks completed within audit schedule",s:"Audit manager sign-off",f:"Per audit"},
+    {n:"Finding accuracy rate",t:"Zero findings overturned on review",s:"Audit manager review",f:"Per audit"},
+    {n:"Working paper quality",t:"Working papers pass quality review first time",s:"Manager review log",f:"Per audit"},
+    {n:"Report turnaround time",t:"Draft report to manager within 3 days of fieldwork",s:"Report submission timestamp",f:"Per audit"},
+  ],
+  "Audit Executive": [
+    {n:"Fieldwork task completion",t:"100% of assigned fieldwork tasks completed on schedule",s:"Audit manager sign-off",f:"Per audit"},
+    {n:"Evidence collection accuracy",t:"All evidence properly referenced and filed",s:"Working paper review",f:"Per audit"},
+    {n:"Working paper filing compliance",t:"All working papers filed per SOP within 24 hours",s:"Filing register",f:"Per audit"},
+    {n:"Daily report submission",t:"Daily progress note submitted to manager",s:"Report submission log",f:"Daily"},
+  ],
+  "Senior Technical Manager": [
+    {n:"Lift and ropeway uptime",t:"Combined uptime above 95% during operating hours",s:"Chairlift Portal submission log (Samsons Digital)",f:"Weekly"},
+    {n:"Planned vs reactive maintenance ratio",t:"Minimum 70% planned maintenance",s:"PistenBully and Chairlift Portal maintenance logs",f:"Monthly"},
+    {n:"Safety audit score",t:"Above 85% on monthly safety inspection",s:"Safety audit report (upload)",f:"Monthly"},
+    {n:"CapEx project delivery",t:"All projects on time and within budget",s:"Project tracker / GM report (upload)",f:"Monthly"},
+    {n:"Energy cost per operating hour",t:"Within seasonally approved budget",s:"Utility bill vs hour meter log",f:"Monthly"},
+    {n:"Team certification compliance",t:"100% of technical staff certifications current",s:"Certification register (upload)",f:"Quarterly"},
+    {n:"Snowmaking efficiency",t:"Target snow volume achieved at or below WBT threshold",s:"MJSR Snowmaking Portal (Samsons Digital)",f:"Weekly"},
+    {n:"Seasonal readiness checklist",t:"100% complete 7 days before season opening",s:"Technical readiness report (upload)",f:"Seasonal"},
+  ],
+  "Store Keeper": [
+    {n:"Stock record accuracy",t:"Physical count matches ledger within 1%",s:"Monthly stock count report",f:"Monthly"},
+    {n:"GRN verification rate",t:"100% of deliveries verified and GRN raised same day",s:"GRN log / Procurement Hub",f:"Daily"},
+    {n:"Zero unrecorded stock issues",t:"All stock issues logged before item leaves store",s:"Stock issue log",f:"Daily"},
+    {n:"Daily stock count submission",t:"End-of-day count submitted before 6pm",s:"Stock log submission timestamp",f:"Daily"},
+  ],
+  "Chairlift Operator": [
+    {n:"Pre-op check completion",t:"100% of daily pre-op checks completed before operation",s:"MJSR Chairlift Portal (Samsons Digital)",f:"Daily"},
+    {n:"Zero safety incidents per shift",t:"Zero reportable incidents per shift",s:"Chairlift Portal incident log",f:"Daily"},
+    {n:"Equipment log entry accuracy",t:"All entries completed correctly per SOP",s:"Chairlift Portal logs",f:"Daily"},
+    {n:"Punctuality and attendance",t:"On station 30 minutes before operating hours",s:"Attendance register",f:"Daily"},
+  ],
+  "Loading Base Station": [
+    {n:"Guest boarding safety compliance",t:"100% of passengers boarded per safety SOP",s:"Chairlift Portal / supervisor observation",f:"Daily"},
+    {n:"Passenger throughput vs benchmark",t:"Meet hourly throughput target (seasonally set)",s:"Chairlift Portal throughput log",f:"Daily"},
+    {n:"Zero incidents per shift",t:"Zero reportable boarding incidents",s:"Chairlift Portal incident log",f:"Daily"},
+    {n:"Punctuality and attendance",t:"On station 30 minutes before operating hours",s:"Attendance register",f:"Daily"},
+  ],
+  "Loading Return Station": [
+    {n:"Safe disembarkation compliance",t:"100% of passengers assisted per safety SOP",s:"Chairlift Portal / supervisor observation",f:"Daily"},
+    {n:"Passenger throughput vs benchmark",t:"Meet hourly throughput target",s:"Chairlift Portal throughput log",f:"Daily"},
+    {n:"Zero incidents per shift",t:"Zero reportable disembarkation incidents",s:"Chairlift Portal incident log",f:"Daily"},
+    {n:"Punctuality and attendance",t:"On station 30 minutes before operating hours",s:"Attendance register",f:"Daily"},
+  ],
+  "Civil Engineer": [
+    {n:"Project milestone delivery",t:"All milestones met on schedule",s:"Project tracker (upload)",f:"Monthly"},
+    {n:"Drawing and BOQ accuracy",t:"Zero revisions required after GM approval",s:"Drawing register / manager sign-off",f:"Per submission"},
+    {n:"Site safety compliance",t:"Zero safety violations on site",s:"Site safety inspection log",f:"Weekly"},
+    {n:"Snag list closure rate",t:"All snags closed within agreed timeframe",s:"Snag list tracker",f:"Monthly"},
+  ],
+  "Electrical Engineer": [
+    {n:"System uptime",t:"Electrical systems uptime above 98%",s:"Fault log / generator portal",f:"Monthly"},
+    {n:"Preventive maintenance completion",t:"100% of scheduled PM tasks completed on time",s:"Maintenance schedule log",f:"Monthly"},
+    {n:"Fault response time",t:"On-site within 20 minutes of fault report",s:"Fault log with timestamps",f:"Per fault"},
+    {n:"Electrical safety inspection compliance",t:"All inspections completed per schedule",s:"Inspection log",f:"Monthly"},
+  ],
+  "Assistant Manager Engineering": [
+    {n:"Work order routing accuracy",t:"All work orders assigned to correct technician within 1 hour",s:"Work order log",f:"Weekly"},
+    {n:"Team deployment vs roster",t:"Zero unauthorised deviations from approved roster",s:"Roster vs deployment check",f:"Weekly"},
+    {n:"Daily technical briefing",t:"Briefing completed before shift start daily",s:"Briefing log",f:"Daily"},
+    {n:"Report timeliness",t:"All reports submitted by agreed deadline",s:"Report submission log",f:"Weekly"},
+  ],
+  "Technician": [
+    {n:"Work order completion rate",t:"100% of assigned work orders closed within SLA",s:"Work order log",f:"Weekly"},
+    {n:"Mean time to repair (MTTR)",t:"Below target MTTR (set per equipment type)",s:"Work order log with timestamps",f:"Monthly"},
+    {n:"Zero missed scheduled inspections",t:"All scheduled inspections completed on time",s:"Maintenance schedule log",f:"Monthly"},
+    {n:"Certification currency",t:"All required certifications valid",s:"Certification register",f:"Quarterly"},
+  ],
+  "Electrician": [
+    {n:"Fault response time",t:"On-site within 20 minutes of report",s:"Fault log with timestamps",f:"Per fault"},
+    {n:"Preventive check completion",t:"100% of scheduled checks done on time",s:"Maintenance schedule log",f:"Monthly"},
+    {n:"Daily log accuracy",t:"All entries complete and correct",s:"Daily electrical log",f:"Daily"},
+    {n:"Zero unreported incidents",t:"All electrical incidents logged immediately",s:"Incident log",f:"Per incident"},
+  ],
+  "Electrical Operator": [
+    {n:"Pre-op check completion",t:"100% pre-op checks before each operating period",s:"Electrical operations log",f:"Daily"},
+    {n:"Zero safety incidents",t:"Zero electrical safety incidents per shift",s:"Incident log",f:"Daily"},
+    {n:"Equipment log accuracy",t:"All log entries complete per SOP",s:"Operations log",f:"Daily"},
+    {n:"Punctuality and attendance",t:"Zero unexplained late arrivals",s:"Attendance register",f:"Daily"},
+  ],
+  "Food Store Keeper": [
+    {n:"Inventory record accuracy",t:"Physical count matches record within 1%",s:"F&B Stock Control Portal (Samsons Digital)",f:"Daily"},
+    {n:"GRN accuracy rate",t:"100% of deliveries verified and logged",s:"F&B Stock Control Portal",f:"Daily"},
+    {n:"Low-stock alert lead time",t:"All low-stock alerts raised 48 hours before stockout",s:"Stock portal alert log",f:"Daily"},
+    {n:"Daily stock count submission",t:"Submitted before 6pm each day",s:"F&B Stock Control Portal submission log",f:"Daily"},
+  ],
+  "Store Keeper Helper": [
+    {n:"Goods receipt verification",t:"All received goods checked against delivery note",s:"GRN log",f:"Daily"},
+    {n:"Shelf organisation compliance",t:"All items stored per SOP (FIFO, labelled)",s:"Supervisor daily inspection",f:"Daily"},
+    {n:"Daily count support accuracy",t:"Zero counting errors on daily stock count",s:"Stock count sheet",f:"Daily"},
+    {n:"Punctuality and attendance",t:"Zero unexplained absences",s:"Attendance register",f:"Daily"},
+  ],
+  "Incharge F&B": [
+    {n:"F&B revenue vs monthly target",t:"Achieve 100% of monthly F&B revenue target",s:"Monthly F&B revenue report (upload)",f:"Monthly"},
+    {n:"Food cost percentage",t:"Food cost below 35% of F&B revenue",s:"F&B cost report (upload)",f:"Monthly"},
+    {n:"Stock wastage percentage",t:"Wastage below 5% of total stock used",s:"F&B Stock Control Portal",f:"Monthly"},
+    {n:"Hygiene audit score",t:"Above 85% on monthly hygiene inspection",s:"Hygiene audit report (upload)",f:"Monthly"},
+    {n:"Customer complaint rate",t:"Zero F&B-attributable complaints per week",s:"Guest complaint log",f:"Weekly"},
+    {n:"Daily stock count submission rate",t:"100% daily submissions from store team",s:"F&B Stock Control Portal log",f:"Daily"},
+    {n:"Staff hygiene certification currency",t:"100% of F&B staff certifications valid",s:"Certification register",f:"Quarterly"},
+  ],
+  "F&B Manager": [
+    {n:"Daily revenue vs target",t:"Meet daily F&B revenue target",s:"Activity Sales Tracker / daily cash report",f:"Daily"},
+    {n:"Team briefing completion",t:"Pre-shift briefing completed daily before service",s:"Briefing log",f:"Daily"},
+    {n:"Quality control checklist",t:"Daily QC checklist completed for all sections",s:"QC log",f:"Daily"},
+    {n:"Guest complaint resolution",t:"All complaints resolved within 2 hours",s:"Complaint resolution log",f:"Per complaint"},
+  ],
+  "F&B Asst. Manager": [
+    {n:"Shift operations quality",t:"All shift checklists completed with zero gaps",s:"Shift checklist log",f:"Daily"},
+    {n:"Staff punctuality compliance",t:"Zero unexplained late arrivals per shift",s:"Attendance register",f:"Daily"},
+    {n:"Prep checklist completion",t:"100% of prep tasks completed before service",s:"Prep checklist log",f:"Daily"},
+    {n:"Zero food safety incidents",t:"Zero food safety incidents per shift",s:"Incident log",f:"Daily"},
+  ],
+  "F&B Supervisor": [
+    {n:"Shift handover quality",t:"Complete written handover completed every shift",s:"Handover log",f:"Daily"},
+    {n:"Crew punctuality rate",t:"Zero crew late arrivals per shift",s:"Attendance register",f:"Daily"},
+    {n:"Checklist compliance",t:"100% of daily checklists completed on time",s:"Checklist submission log",f:"Daily"},
+    {n:"Guest service interaction score",t:"Positive feedback on shift",s:"Guest feedback log",f:"Daily"},
+  ],
+  "Kababi": [
+    {n:"Production output vs daily standard",t:"Meet daily production target (portions)",s:"Supervisor confirmation / production log",f:"Daily"},
+    {n:"Zero food safety incidents",t:"Zero hygiene or safety incidents per shift",s:"Hygiene log",f:"Daily"},
+    {n:"Prep checklist completion",t:"All prep tasks completed before service",s:"Prep checklist",f:"Daily"},
+    {n:"Punctuality and attendance",t:"Zero unexplained absences",s:"Attendance register",f:"Daily"},
+  ],
+  "Chef": [
+    {n:"Production output vs daily standard",t:"Meet daily production target (portions)",s:"Supervisor confirmation / production log",f:"Daily"},
+    {n:"Portion control compliance",t:"All portions within approved serving weight",s:"Portion spot-check log",f:"Daily"},
+    {n:"Zero food safety incidents",t:"Zero hygiene or safety incidents",s:"Hygiene log",f:"Daily"},
+    {n:"Punctuality and attendance",t:"Zero unexplained absences",s:"Attendance register",f:"Daily"},
+  ],
+  "Tea Seller": [
+    {n:"Revenue per shift vs target",t:"Meet daily revenue target for tea station",s:"Daily sales log / cash report",f:"Daily"},
+    {n:"Cash reconciliation accuracy",t:"Zero variance between sales and cash collected",s:"Daily cash reconciliation",f:"Daily"},
+    {n:"Zero guest complaints",t:"Zero complaints attributable to tea station",s:"Complaint log",f:"Daily"},
+    {n:"Punctuality and attendance",t:"Zero unexplained absences",s:"Attendance register",f:"Daily"},
+  ],
+  "Waiter": [
+    {n:"Order accuracy rate",t:"Zero wrong orders delivered per shift",s:"Supervisor observation / complaint log",f:"Daily"},
+    {n:"Average service time",t:"Table served within 10 minutes of order",s:"Supervisor observation",f:"Daily"},
+    {n:"Guest satisfaction per shift",t:"Zero complaints attributable to service",s:"Guest complaint log",f:"Daily"},
+    {n:"Punctuality and attendance",t:"Zero unexplained absences",s:"Attendance register",f:"Daily"},
+  ],
+  "Restaurant Housekeeper": [
+    {n:"Area cleanliness checklist",t:"All zones cleaned per schedule and signed off",s:"Cleaning schedule log",f:"Daily"},
+    {n:"Guest complaint rate",t:"Zero cleanliness complaints",s:"Complaint log",f:"Daily"},
+    {n:"Task completion per shift",t:"All assigned tasks completed before end of shift",s:"Supervisor sign-off",f:"Daily"},
+    {n:"Punctuality and attendance",t:"Zero unexplained absences",s:"Attendance register",f:"Daily"},
+  ],
+  "Burger Seller": [
+    {n:"Revenue per shift vs target",t:"Meet daily revenue target",s:"Daily sales log / cash report",f:"Daily"},
+    {n:"Cash reconciliation accuracy",t:"Zero cash variance",s:"Daily cash reconciliation",f:"Daily"},
+    {n:"Zero guest complaints",t:"Zero complaints per shift",s:"Complaint log",f:"Daily"},
+    {n:"Hygiene compliance",t:"Pass daily hygiene check",s:"Hygiene inspection log",f:"Daily"},
+  ],
+  "Dish Washer": [
+    {n:"Turnaround time per wash load",t:"All loads turned within 20 minutes",s:"Supervisor observation",f:"Daily"},
+    {n:"Zero breakage incidents",t:"Zero breakage per shift",s:"Breakage log",f:"Daily"},
+    {n:"Hygiene score per shift",t:"Pass daily hygiene inspection",s:"Hygiene inspection log",f:"Daily"},
+    {n:"Punctuality and attendance",t:"Zero unexplained absences",s:"Attendance register",f:"Daily"},
+  ],
+  "Cashier": [
+    {n:"Cash reconciliation accuracy",t:"Zero variance between system and physical cash",s:"Daily cash reconciliation report",f:"Daily"},
+    {n:"Transaction accuracy rate",t:"Zero incorrect transactions per shift",s:"POS log / cash report",f:"Daily"},
+    {n:"Void and refund rate",t:"Voids and refunds below 1% of total transactions",s:"POS log",f:"Weekly"},
+    {n:"Daily cash report submission",t:"Report submitted to manager before end of shift",s:"Report submission log",f:"Daily"},
+  ],
+  "Ride Operator": [
+    {n:"Pre-op check completion",t:"100% of pre-op checks completed before first ride",s:"MJSR Adventure Checks Portal (Samsons Digital)",f:"Daily"},
+    {n:"Rides per hour vs benchmark",t:"Meet hourly throughput target",s:"Activity Sales Tracker",f:"Daily"},
+    {n:"Zero safety incidents per shift",t:"Zero reportable safety incidents",s:"Incident log / Adventure Checks Portal",f:"Daily"},
+    {n:"Guest interaction quality",t:"Zero guest complaints attributable to operator",s:"Guest complaint log",f:"Daily"},
+  ],
+  "CSR": [
+    {n:"Guest query resolution rate",t:"100% of queries resolved at first point of contact",s:"CSR daily log",f:"Daily"},
+    {n:"Upsell conversion rate",t:"Minimum 20% of interactions result in upsell",s:"Activity Sales Tracker",f:"Daily"},
+    {n:"Customer satisfaction score",t:"Zero complaints attributable to CSR",s:"Guest complaint log",f:"Daily"},
+    {n:"Daily activity log completion",t:"Log submitted before end of shift",s:"Log submission timestamp",f:"Daily"},
+  ],
+  "Resort Photographer": [
+    {n:"Photo deliverables per shift",t:"Minimum agreed number of edited photos per shift",s:"Photo delivery log",f:"Daily"},
+    {n:"Photo purchase conversion rate",t:"Minimum 15% of photographed guests purchase",s:"Sales log",f:"Daily"},
+    {n:"Asset quality score",t:"All deliverables approved by supervisor",s:"Supervisor sign-off",f:"Daily"},
+    {n:"Punctuality and attendance",t:"Zero unexplained absences",s:"Attendance register",f:"Daily"},
+  ],
+  "Front Desk Manager": [
+    {n:"Occupancy rate",t:"Optimise occupancy across 13 guest rooms",s:"Samsons Inn Daily Sales Tracker (Samsons Digital)",f:"Daily"},
+    {n:"Check-in and check-out processing time",t:"All guests processed within 5 minutes",s:"Front desk log",f:"Daily"},
+    {n:"Daily tracker submission accuracy",t:"Zero errors in Samsons Inn daily tracker entries",s:"Samsons Inn portal log",f:"Daily"},
+    {n:"Guest satisfaction score",t:"Zero complaints attributable to front desk",s:"Guest complaint log",f:"Daily"},
+    {n:"Reservation accuracy rate",t:"Zero booking errors per month",s:"Reservation log",f:"Monthly"},
+  ],
+  "Cook Helper": [
+    {n:"Prep task completion",t:"All assigned prep tasks completed before service",s:"Supervisor sign-off",f:"Daily"},
+    {n:"Zero food safety incidents",t:"Zero hygiene incidents per shift",s:"Hygiene log",f:"Daily"},
+    {n:"Hygiene compliance",t:"Pass daily hygiene check",s:"Hygiene inspection log",f:"Daily"},
+    {n:"Punctuality and attendance",t:"Zero unexplained absences",s:"Attendance register",f:"Daily"},
+  ],
+  "Cook": [
+    {n:"Production output vs daily standard",t:"Meet daily production target",s:"Supervisor confirmation / production log",f:"Daily"},
+    {n:"Food cost compliance",t:"No unauthorised ingredient substitutions",s:"Supervisor sign-off",f:"Daily"},
+    {n:"Hygiene audit score",t:"Pass daily hygiene inspection",s:"Hygiene inspection log",f:"Daily"},
+    {n:"Zero food safety incidents",t:"Zero incidents per shift",s:"Incident log",f:"Daily"},
+  ],
+  "Care Taker": [
+    {n:"Facility cleanliness checklist",t:"All areas signed off daily",s:"Cleaning log",f:"Daily"},
+    {n:"Guest complaint rate",t:"Zero complaints attributable to housekeeping",s:"Complaint log",f:"Daily"},
+    {n:"Maintenance defect reporting",t:"All defects reported within 2 hours of discovery",s:"Defect report log",f:"Per defect"},
+    {n:"Punctuality and attendance",t:"Zero unexplained absences",s:"Attendance register",f:"Daily"},
+  ],
+  "Civil Supervisor": [
+    {n:"Team task completion per day",t:"All daily tasks completed before end of shift",s:"Supervisor daily report",f:"Daily"},
+    {n:"Daily briefing and toolbox talk",t:"Completed before work commences each day",s:"Briefing log",f:"Daily"},
+    {n:"Zero safety incidents",t:"Zero reportable safety incidents",s:"Site safety log",f:"Daily"},
+    {n:"Site report submission",t:"Daily site report submitted before 5pm",s:"Report submission log",f:"Daily"},
+  ],
+  "Mason": [
+    {n:"Work output vs daily target",t:"Meet daily output target set by supervisor",s:"Supervisor sign-off",f:"Daily"},
+    {n:"Quality inspection pass rate",t:"All work passes quality check first time",s:"Quality inspection log",f:"Daily"},
+    {n:"Zero safety incidents",t:"Zero reportable incidents per shift",s:"Site safety log",f:"Daily"},
+    {n:"Materials usage accuracy",t:"No unexplained material wastage",s:"Materials usage log",f:"Daily"},
+  ],
+  "Labour": [
+    {n:"Task completion per shift",t:"All assigned tasks completed per supervisor instruction",s:"Supervisor sign-off",f:"Daily"},
+    {n:"Zero safety incidents",t:"Zero reportable safety incidents",s:"Site safety log",f:"Daily"},
+    {n:"Punctuality and attendance",t:"Zero unexplained absences",s:"Attendance register",f:"Daily"},
+  ],
+  "Cleaner": [
+    {n:"Area cleaning schedule adherence",t:"All zones cleaned per schedule and signed off",s:"Cleaning schedule log",f:"Daily"},
+    {n:"Zero complaint incidents",t:"Zero cleanliness complaints",s:"Complaint log",f:"Daily"},
+    {n:"Punctuality and attendance",t:"Zero unexplained absences",s:"Attendance register",f:"Daily"},
+  ],
+  "Washroom Cleaner": [
+    {n:"Cleaning frequency compliance",t:"Washrooms cleaned per posted schedule (min. every 2 hours)",s:"Cleaning schedule log",f:"Daily"},
+    {n:"Hygiene score per inspection",t:"Pass all hygiene spot checks",s:"Hygiene inspection log",f:"Daily"},
+    {n:"Punctuality and attendance",t:"Zero unexplained absences",s:"Attendance register",f:"Daily"},
+  ],
+  "Dispenser (DW)": [
+    {n:"Drug issuance log accuracy",t:"Zero unrecorded dispensing events",s:"Dispensing log",f:"Daily"},
+    {n:"Zero unrecorded dispensing",t:"All items dispensed matched against prescription",s:"Dispensing log",f:"Daily"},
+    {n:"Punctuality and attendance",t:"Zero unexplained absences",s:"Attendance register",f:"Daily"},
+  ],
+  "Tandoorchi": [
+    {n:"Production output vs daily standard",t:"Meet daily bread production target",s:"Supervisor sign-off / production log",f:"Daily"},
+    {n:"Zero food safety incidents",t:"Zero hygiene incidents per shift",s:"Hygiene log",f:"Daily"},
+    {n:"Punctuality and attendance",t:"Zero unexplained absences",s:"Attendance register",f:"Daily"},
+  ],
+  "Pakora Maker": [
+    {n:"Production output vs daily standard",t:"Meet daily production target (portions)",s:"Supervisor sign-off / production log",f:"Daily"},
+    {n:"Zero food safety incidents",t:"Zero hygiene incidents per shift",s:"Hygiene log",f:"Daily"},
+    {n:"Punctuality and attendance",t:"Zero unexplained absences",s:"Attendance register",f:"Daily"},
+  ],
+  "Guest House Cook": [
+    {n:"Production output vs daily standard",t:"Meet daily meal production target",s:"Supervisor sign-off",f:"Daily"},
+    {n:"Hygiene audit score",t:"Pass daily hygiene inspection",s:"Hygiene inspection log",f:"Daily"},
+    {n:"Zero guest complaints",t:"Zero complaints per shift",s:"Complaint log",f:"Daily"},
+    {n:"Punctuality and attendance",t:"Zero unexplained absences",s:"Attendance register",f:"Daily"},
+  ],
+  "Water Pump Operator": [
+    {n:"Daily operating hours log",t:"Operating log completed every shift",s:"Water operations log",f:"Daily"},
+    {n:"Zero unscheduled downtime",t:"Zero unplanned pump failures",s:"Fault log",f:"Daily"},
+    {n:"Water supply log completeness",t:"All supply readings recorded per schedule",s:"Water log",f:"Daily"},
+    {n:"Maintenance defect reporting",t:"All defects reported within 1 hour of discovery",s:"Defect report log",f:"Per defect"},
+  ],
+  "Zipline Operator": [
+    {n:"Pre-op check completion",t:"100% of checks completed before first ride",s:"MJSR Adventure Checks Portal (Samsons Digital)",f:"Daily"},
+    {n:"Rides per hour vs benchmark",t:"Meet hourly throughput target (seasonally set)",s:"Activity Sales Tracker",f:"Daily"},
+    {n:"Zero safety incidents",t:"Zero reportable incidents per shift",s:"Incident log / Adventure Checks Portal",f:"Daily"},
+    {n:"Rain and wind override compliance",t:"All weather overrides logged with reason",s:"Adventure Checks Portal override log",f:"Per override"},
+    {n:"Equipment inspection log",t:"All equipment checks completed and logged",s:"Adventure Checks Portal",f:"Daily"},
+  ],
+  "Giant Swing Operator": [
+    {n:"Pre-op check completion",t:"100% of checks completed before first ride",s:"MJSR Adventure Checks Portal (Samsons Digital)",f:"Daily"},
+    {n:"Rides per hour vs benchmark",t:"Meet hourly throughput target",s:"Activity Sales Tracker",f:"Daily"},
+    {n:"Zero safety incidents",t:"Zero reportable incidents per shift",s:"Incident log / Adventure Checks Portal",f:"Daily"},
+    {n:"Harness inspection log",t:"All harness checks logged before every session",s:"Adventure Checks Portal",f:"Daily"},
+    {n:"Guest restriction compliance",t:"Zero guests permitted to ride outside weight/health limits",s:"Operator log",f:"Daily"},
+  ],
+  "Ferris Wheel Operator": [
+    {n:"Pre-op check completion",t:"100% of checks before first operation",s:"GV Adventure Checks Portal (Samsons Digital)",f:"Daily"},
+    {n:"Zero safety incidents",t:"Zero reportable incidents per shift",s:"Incident log",f:"Daily"},
+    {n:"Guest throughput per operating hour",t:"Meet hourly throughput target",s:"GV activity log",f:"Daily"},
+    {n:"Punctuality and attendance",t:"Zero unexplained absences",s:"Attendance register",f:"Daily"},
+  ],
+  "Kids Zip Line Operator": [
+    {n:"Pre-op check completion",t:"100% of checks before first operation",s:"GV Adventure Checks Portal",f:"Daily"},
+    {n:"Zero safety incidents",t:"Zero reportable incidents per shift",s:"Incident log",f:"Daily"},
+    {n:"Guest throughput per hour",t:"Meet hourly throughput target",s:"GV activity log",f:"Daily"},
+    {n:"Punctuality and attendance",t:"Zero unexplained absences",s:"Attendance register",f:"Daily"},
+  ],
+  "Tuby Operator": [
+    {n:"Pre-op check completion",t:"100% of checks before first operation",s:"GV Adventure Checks Portal",f:"Daily"},
+    {n:"Zero safety incidents",t:"Zero reportable incidents per shift",s:"Incident log",f:"Daily"},
+    {n:"Guest throughput per hour",t:"Meet hourly throughput target",s:"GV activity log",f:"Daily"},
+    {n:"Punctuality and attendance",t:"Zero unexplained absences",s:"Attendance register",f:"Daily"},
+  ],
+  "GV Cleaner": [
+    {n:"Area cleaning schedule adherence",t:"All GV zones cleaned per schedule and signed off",s:"GV cleaning log",f:"Daily"},
+    {n:"Zero complaint incidents",t:"Zero cleanliness complaints from guests",s:"Complaint log",f:"Daily"},
+    {n:"Punctuality and attendance",t:"Zero unexplained absences",s:"Attendance register",f:"Daily"},
+  ],
+};
+
+function getKPIs(role) {
+  return KPIS[role] || [
+    {n:"Task completion per shift",t:"All assigned tasks completed per supervisor instruction",s:"Supervisor sign-off",f:"Daily"},
+    {n:"Zero safety incidents",t:"Zero reportable incidents per shift",s:"Incident log",f:"Daily"},
+    {n:"Punctuality and attendance",t:"Zero unexplained absences",s:"Attendance register",f:"Daily"},
+  ];
+}
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let activeDept = null;
+let tierFilter = null;
+let dwFilter = false;
+let openCards = new Set();
+
+// ─── PIN ─────────────────────────────────────────────────────────────────────
+const CORRECT_PIN = '1234';
+let pinEntry = '';
+
+function pinPress(n) {
+  if (pinEntry.length >= 4) return;
+  pinEntry += n;
+  updateDots();
+  if (pinEntry.length === 4) {
+    setTimeout(() => {
+      if (pinEntry === CORRECT_PIN) {
+        document.getElementById('pin-screen').style.display = 'none';
+        document.getElementById('app').style.display = 'block';
+        render();
+      } else {
+        document.getElementById('pin-error').classList.add('show');
+        setTimeout(() => { pinEntry = ''; updateDots(); document.getElementById('pin-error').classList.remove('show'); }, 900);
+      }
+    }, 150);
+  }
+}
+function pinBack() { pinEntry = pinEntry.slice(0,-1); updateDots(); }
+function pinClear() { pinEntry = ''; updateDots(); }
+function updateDots() {
+  for (let i=0;i<4;i++) {
+    document.getElementById('d'+i).className = 'pin-dot' + (i < pinEntry.length ? ' filled' : '');
+  }
+}
+function lockPortal() {
+  pinEntry = '';
+  updateDots();
+  document.getElementById('pin-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+  openCards.clear();
+}
+
+// ─── FILTER / RENDER ─────────────────────────────────────────────────────────
+function toggleFilter(t) {
+  if (t === 'DW') { dwFilter = !dwFilter; }
+  else { tierFilter = tierFilter === t ? null : t; }
+  render();
+}
+function clearFilters() {
+  tierFilter = null; dwFilter = false;
+  document.getElementById('search-input').value = '';
+  render();
+}
+
+function filteredStaff() {
+  const q = document.getElementById('search-input').value.toLowerCase();
+  return STAFF.filter(s => {
+    if (tierFilter && s.tier !== tierFilter) return false;
+    if (dwFilter && !s.dw) return false;
+    if (q && !s.name.toLowerCase().includes(q) && !s.role.toLowerCase().includes(q) && !s.dept.toLowerCase().includes(q)) return false;
+    return true;
+  });
+}
+
+function getDepts(list) {
+  const m = {};
+  list.forEach(s => { if (!m[s.dept]) m[s.dept] = []; m[s.dept].push(s); });
+  return m;
+}
+
+function initials(name) {
+  return name.split(' ').filter(Boolean).slice(0,2).map(w=>w[0].toUpperCase()).join('');
+}
+
+function avatarClass(s) {
+  if (s.dw) return 'avatar-dw';
+  if (s.tier==='A') return 'avatar-a';
+  if (s.tier==='B') return 'avatar-b';
+  return 'avatar-c';
+}
+function tierClass(s) {
+  if (s.dw) return 'tier-dw';
+  if (s.tier==='A') return 'tier-a';
+  if (s.tier==='B') return 'tier-b';
+  return 'tier-c';
+}
+function tierLabel(s) {
+  if (s.dw) return 'Daily Wage';
+  return 'Tier ' + s.tier;
+}
+
+function render() {
+  const list = filteredStaff();
+  const dm = getDepts(list);
+  const depts = Object.keys(dm);
+
+  if (activeDept && !depts.includes(activeDept)) activeDept = depts[0] || null;
+  if (!activeDept && depts.length) activeDept = depts[0];
+
+  const tA = list.filter(s=>s.tier==='A').length;
+  const tB = list.filter(s=>s.tier==='B').length;
+  const tC = list.filter(s=>s.tier==='C'&&!s.dw).length;
+  const dw = list.filter(s=>s.dw).length;
+
+  document.getElementById('stat-bar').innerHTML = `
+    <div class="stat-item"><div class="stat-val">${list.length}</div><div class="stat-lbl">Staff in scope</div></div>
+    <div class="stat-item"><div class="stat-val">${depts.length}</div><div class="stat-lbl">Departments</div></div>
+    <div class="stat-item stat-gold"><div class="stat-val">${tA}</div><div class="stat-lbl">Tier A</div></div>
+    <div class="stat-item"><div class="stat-val" style="color:#2a6a2a">${tB}</div><div class="stat-lbl">Tier B</div></div>
+    <div class="stat-item"><div class="stat-val">${tC}</div><div class="stat-lbl">Tier C</div></div>
+    <div class="stat-item"><div class="stat-val" style="color:#5a3a7a">${dw}</div><div class="stat-lbl">Daily Wage</div></div>
+    <div class="stat-item" style="margin-left:auto;border-right:none;padding-right:0">
+      <div style="font-size:10px;color:#4a4a42;letter-spacing:1px;text-transform:uppercase;margin-bottom:2px">System</div>
+      <div style="font-size:11px;color:#6a6a60">MJSR-KPI-MASTER v1.0 &nbsp;|&nbsp; Phase 1</div>
+    </div>
+  `;
+
+  ['A','B','C'].forEach(t => {
+    const el = document.getElementById('pill-'+t.toLowerCase());
+    el.className = 'filter-pill' + (tierFilter===t ? ' active-'+t.toLowerCase() : '');
+  });
+  document.getElementById('pill-dw').className = 'filter-pill' + (dwFilter ? ' active-dw' : '');
+
+  // Sidebar
+  document.getElementById('sidebar-list').innerHTML = depts.map(d => {
+    const members = dm[d];
+    const cA = members.filter(s=>s.tier==='A'&&!s.dw).length;
+    const cB = members.filter(s=>s.tier==='B'&&!s.dw).length;
+    const cC = members.filter(s=>s.tier==='C'&&!s.dw).length;
+    const cDW = members.filter(s=>s.dw).length;
+    return `<div class="dept-item${activeDept===d?' active':''}" onclick="setDept(${JSON.stringify(d)})">
+      <div class="dept-name">${d}</div>
+      <div class="dept-meta">
+        <span class="dept-count">${members.length} staff</span>
+        <div class="dept-tiers">
+          ${cA?`<span class="mini-badge mini-a">A:${cA}</span>`:''}
+          ${cB?`<span class="mini-badge mini-b">B:${cB}</span>`:''}
+          ${cC?`<span class="mini-badge mini-c">C:${cC}</span>`:''}
+          ${cDW?`<span class="mini-badge mini-dw">DW:${cDW}</span>`:''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Content
+  if (!activeDept || !dm[activeDept]) {
+    document.getElementById('content-area').innerHTML = `<div class="empty-state"><div class="empty-icon">&#9776;</div><div class="empty-text">Select a department from the sidebar</div></div>`;
+    return;
+  }
+
+  const members = dm[activeDept];
+  const dA = members.filter(s=>s.tier==='A'&&!s.dw).length;
+  const dB = members.filter(s=>s.tier==='B'&&!s.dw).length;
+  const dC = members.filter(s=>s.tier==='C'&&!s.dw).length;
+  const dDW = members.filter(s=>s.dw).length;
+  const totalKPIs = members.reduce((a,s)=>a+getKPIs(s.role).length,0);
+
+  const cards = members.map(s => {
+    const kpis = getKPIs(s.role);
+    const cardId = 'card-'+s.name.replace(/\s+/g,'_').replace(/[^a-zA-Z0-9_]/g,'');
+    const isOpen = openCards.has(cardId);
+    const freqSummary = [...new Set(kpis.map(k=>k.f))].join(' / ');
+    return `
+    <div class="staff-card" id="${cardId}">
+      <div class="staff-card-header" onclick="toggleCard('${cardId}')">
+        <div class="staff-card-left">
+          <div class="staff-avatar ${avatarClass(s)}">${initials(s.name)}</div>
+          <div>
+            <div class="staff-name">${s.name}</div>
+            <div class="staff-role">${s.role}</div>
+          </div>
+        </div>
+        <div class="staff-card-right">
+          <span style="font-size:11px;color:var(--muted)">${kpis.length} KPIs &nbsp;|&nbsp; ${freqSummary}</span>
+          ${s.dw ? '<span class="dw-tag">Daily Wage</span>' : ''}
+          <span class="tier-badge ${tierClass(s)}">${tierLabel(s)}</span>
+          <span class="chevron${isOpen?' open':''}">&#9660;</span>
+        </div>
+      </div>
+      <div class="staff-card-body${isOpen?' open':''}">
+        <div class="kpi-col-header">
+          <div class="kpi-col-lbl">#</div>
+          <div class="kpi-col-lbl">KPI</div>
+          <div class="kpi-col-lbl">Target</div>
+          <div class="kpi-col-lbl">Evidence source</div>
+          <div class="kpi-col-lbl">Frequency</div>
+        </div>
+        <div class="kpi-list">
+          ${kpis.map((k,i)=>`
+          <div class="kpi-row">
+            <div class="kpi-num">${i+1}</div>
+            <div class="kpi-name">${k.n}</div>
+            <div class="kpi-target">${k.t}</div>
+            <div class="kpi-source">${k.s}</div>
+            <div class="kpi-freq">${k.f}</div>
+          </div>`).join('')}
+        </div>
+        <div style="padding:10px 20px;background:var(--cream-dark);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+          <span style="font-size:11px;color:var(--muted);letter-spacing:.5px">Scoring: Phase 2 &mdash; Evidence upload enabled after KPI definitions finalised</span>
+          <button class="print-btn" onclick="printCard('${cardId}','${s.name}')">Print KPI card</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('content-area').innerHTML = `
+    <div class="dept-header">
+      <div class="dept-header-top">
+        <div>
+          <div class="dept-header-name">${activeDept}</div>
+          <div class="dept-header-sub">${members.length} staff &nbsp;&mdash;&nbsp; Click any card to expand KPI detail</div>
+        </div>
+        <button class="print-btn" onclick="window.print()">Print department</button>
+      </div>
+      <div class="dept-stats">
+        ${dA?`<div class="dept-stat"><div class="dept-stat-val" style="color:var(--tier-a-text)">${dA}</div><div class="dept-stat-lbl">Tier A</div></div>`:''}
+        ${dB?`<div class="dept-stat"><div class="dept-stat-val" style="color:var(--tier-b-text)">${dB}</div><div class="dept-stat-lbl">Tier B</div></div>`:''}
+        ${dC?`<div class="dept-stat"><div class="dept-stat-val">${dC}</div><div class="dept-stat-lbl">Tier C</div></div>`:''}
+        ${dDW?`<div class="dept-stat"><div class="dept-stat-val" style="color:var(--dw-text)">${dDW}</div><div class="dept-stat-lbl">Daily Wage</div></div>`:''}
+        <div class="dept-stat"><div class="dept-stat-val" style="color:var(--gold)">${totalKPIs}</div><div class="dept-stat-lbl">Total KPIs</div></div>
+      </div>
+    </div>
+    <div class="cards-grid">${cards}</div>
+  `;
+}
+
+function setDept(d) {
+  activeDept = d;
+  openCards.clear();
+  render();
+  document.getElementById('content-area').scrollTop = 0;
+}
+
+function toggleCard(id) {
+  if (openCards.has(id)) openCards.delete(id);
+  else openCards.add(id);
+  const body = document.querySelector('#'+id+' .staff-card-body');
+  const chev = document.querySelector('#'+id+' .chevron');
+  if (body) body.classList.toggle('open', openCards.has(id));
+  if (chev) chev.classList.toggle('open', openCards.has(id));
+}
+
+function printCard(cardId, name) {
+  const card = document.getElementById(cardId);
+  const body = card.querySelector('.staff-card-body');
+  const wasOpen = openCards.has(cardId);
+  if (!wasOpen) { openCards.add(cardId); body.classList.add('open'); }
+  window.print();
+  if (!wasOpen) { openCards.delete(cardId); body.classList.remove('open'); }
+}
+</script>
+</body>
+</html>
