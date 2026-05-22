@@ -1242,11 +1242,12 @@ function tierLabel(s) {
 
 function render() {
   const list = filteredStaff();
-  const dm = getDepts(list);
-  const depts = Object.keys(dm);
+  // Sidebar always uses FULL unfiltered staff list so all departments are always navigable
+  const allDm = getDepts(STAFF);
+  const allDepts = Object.keys(allDm);
 
-  if (activeDept && !depts.includes(activeDept)) activeDept = depts[0] || null;
-  if (!activeDept && depts.length) activeDept = depts[0];
+  if (activeDept && !allDepts.includes(activeDept)) activeDept = allDepts[0] || null;
+  if (!activeDept && allDepts.length) activeDept = allDepts[0];
 
   const tA = list.filter(s=>s.tier==='A').length;
   const tB = list.filter(s=>s.tier==='B').length;
@@ -1255,7 +1256,7 @@ function render() {
 
   document.getElementById('stat-bar').innerHTML = `
     <div class="stat-item"><div class="stat-val">${list.length}</div><div class="stat-lbl">Staff in scope</div></div>
-    <div class="stat-item"><div class="stat-val">${depts.length}</div><div class="stat-lbl">Departments</div></div>
+    <div class="stat-item"><div class="stat-val">${allDepts.length}</div><div class="stat-lbl">Departments</div></div>
     <div class="stat-item stat-gold"><div class="stat-val">${tA}</div><div class="stat-lbl">Tier A</div></div>
     <div class="stat-item"><div class="stat-val" style="color:#2a6a2a">${tB}</div><div class="stat-lbl">Tier B</div></div>
     <div class="stat-item"><div class="stat-val">${tC}</div><div class="stat-lbl">Tier C</div></div>
@@ -1272,14 +1273,15 @@ function render() {
   });
   document.getElementById('pill-dw').className = 'filter-pill' + (dwFilter ? ' active-dw' : '');
 
-  // Sidebar
-  document.getElementById('sidebar-list').innerHTML = depts.map(d => {
-    const members = dm[d];
+  // Sidebar — always built from full unfiltered list
+  document.getElementById('sidebar-list').innerHTML = allDepts.map(d => {
+    const members = allDm[d];
     const cA = members.filter(s=>s.tier==='A'&&!s.dw).length;
     const cB = members.filter(s=>s.tier==='B'&&!s.dw).length;
     const cC = members.filter(s=>s.tier==='C'&&!s.dw).length;
     const cDW = members.filter(s=>s.dw).length;
-    return `<div class="dept-item${activeDept===d?' active':''}" onclick="setDept(${JSON.stringify(d)})">
+    const safeKey = btoa(unescape(encodeURIComponent(d)));
+    return `<div class="dept-item${activeDept===d?' active':''}" data-dkey="${safeKey}" onclick="setDeptKey(this.dataset.dkey)">
       <div class="dept-name">${d}</div>
       <div class="dept-meta">
         <span class="dept-count">${members.length} staff</span>
@@ -1293,18 +1295,29 @@ function render() {
     </div>`;
   }).join('');
 
-  // Content
-  if (!activeDept || !dm[activeDept]) {
+  // Content — always load from full dept list, then apply filter within the dept
+  if (!activeDept || !allDm[activeDept]) {
     document.getElementById('content-area').innerHTML = `<div class="empty-state"><div class="empty-icon">&#9776;</div><div class="empty-text">Select a department from the sidebar</div></div>`;
     return;
   }
 
-  const members = dm[activeDept];
-  const dA = members.filter(s=>s.tier==='A'&&!s.dw).length;
-  const dB = members.filter(s=>s.tier==='B'&&!s.dw).length;
-  const dC = members.filter(s=>s.tier==='C'&&!s.dw).length;
-  const dDW = members.filter(s=>s.dw).length;
-  const totalKPIs = members.reduce((a,s)=>a+getKPIs(s.role).length,0);
+  // All members in this dept (unfiltered) for header stats
+  const allMembers = allDm[activeDept];
+  // Filtered members for cards display
+  const members = allMembers.filter(s => {
+    if (tierFilter && s.tier !== tierFilter) return false;
+    if (dwFilter && !s.dw) return false;
+    const q = document.getElementById('search-input').value.toLowerCase();
+    if (q && !s.name.toLowerCase().includes(q) && !s.role.toLowerCase().includes(q)) return false;
+    return true;
+  });
+
+  const dA = allMembers.filter(s=>s.tier==='A'&&!s.dw).length;
+  const dB = allMembers.filter(s=>s.tier==='B'&&!s.dw).length;
+  const dC = allMembers.filter(s=>s.tier==='C'&&!s.dw).length;
+  const dDW = allMembers.filter(s=>s.dw).length;
+  const totalKPIs = allMembers.reduce((a,s)=>a+getKPIs(s.role).length,0);
+  const filterNote = members.length < allMembers.length ? ` (showing ${members.length} of ${allMembers.length} with active filter)` : '';
 
   const cards = members.map(s => {
     const kpis = getKPIs(s.role);
@@ -1359,7 +1372,7 @@ function render() {
       <div class="dept-header-top">
         <div>
           <div class="dept-header-name">${activeDept}</div>
-          <div class="dept-header-sub">${members.length} staff &nbsp;&mdash;&nbsp; Click any card to expand KPI detail</div>
+          <div class="dept-header-sub">${allMembers.length} staff${filterNote} &nbsp;&mdash;&nbsp; Click any card to expand KPI detail</div>
         </div>
         <button class="print-btn" onclick="window.print()">Print department</button>
       </div>
@@ -1373,6 +1386,13 @@ function render() {
     </div>
     <div class="cards-grid">${cards}</div>
   `;
+}
+
+function setDeptKey(key) {
+  try {
+    const d = decodeURIComponent(escape(atob(key)));
+    setDept(d);
+  } catch(e) { console.error('setDeptKey error', e); }
 }
 
 function setDept(d) {
